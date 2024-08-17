@@ -24,8 +24,11 @@ jobs:
       - name: Install npm Dependencies
         run: npm install
 
-      - name: Build Application
-        run: npm run build
+      - name: Install Composer Dependencies
+        run: |
+          node build --composer-install
+          cd site
+          composer update --no-interaction --dev
 
       - name: Run Unit Tests
         run: npm run test
