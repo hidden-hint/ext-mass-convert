@@ -1,0 +1,5 @@
+{
+    "recordViews": {
+        "list": "mass-convert:views/lead/record/list"
+    }
+}

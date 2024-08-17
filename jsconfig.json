@@ -3,7 +3,7 @@
         "paths": {
             "*": ["site/client/src/*"],
             "modules/crm/*": ["site/client/modules/crm/src/*"],
-            "modules/{@nameHyphen}/*": ["src/files/client/custom/modules/{@nameHyphen}/src/*"]
+            "modules/mass-lead-conversion-extension-for-espo-c-r-m/*": ["src/files/client/custom/modules/mass-lead-conversion-extension-for-espo-c-r-m/src/*"]
         },
         "module": "ES6",
         "target": "ES2018"

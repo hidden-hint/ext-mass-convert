@@ -1,14 +1,14 @@
 {
-    "module": "{@name}",
-    "name": "{@nameLabel}",
-    "description": "{@description}",
-    "author": "{@author}",
-    "bundled": {@bundled},
+    "module": "MassConvert",
+    "name": "Mass Lead Conversion Extension for EspoCRM",
+    "description": "An extension that allows bulk lead conversion to arbitrary entity types.",
+    "author": "hidden hint GmbH",
+    "bundled": true,
     "acceptableVersions": [
-        ">=7.3.0"
+        ">=8.3.6"
     ],
     "php": [
-        ">=7.2"
+        ">=8.1"
     ],
     "scripts": []
 }

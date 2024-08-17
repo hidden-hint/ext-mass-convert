@@ -1,18 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
+use Espo\Core\Container;
+
 class AfterUninstall
 {
-    protected $container;
-
-    public function run($container)
+    public function run(Container $container): void
     {
-        $this->container = $container;
-    }
-
-    protected function clearCache()
-    {
-        try {
-            $this->container->get('dataManager')->clearCache();
-        } catch (\Exception $e) {}
+        $container->get('dataManager')->clearCache();
     }
 }

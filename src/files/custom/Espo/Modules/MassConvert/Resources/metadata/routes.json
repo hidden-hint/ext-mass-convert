@@ -1,0 +1,7 @@
+[
+    {
+        "route": "/Lead/action/massConvert",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\MassConvert\\Api\\MassConvert"
+    }
+]

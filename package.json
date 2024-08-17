@@ -1,12 +1,13 @@
 {
-  "name": "espocrm-ext-{@nameHyphen}",
-  "version": "0.0.1",
+  "name": "espocrm-ext-mass-convert",
+  "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node build --all",
+    "test": "node build --copy; site/vendor/bin/phpunit site/tests/unit/Espo/Modules/MassConvert"
   },
   "type": "module",
-  "author": "{@author}",
+  "author": "hidden hint GmbH",
   "dependencies": {
     "espo-extension-tools": "github:espocrm/extension-tools#0.1.5",
     "fs-extra": "^9.0.0"
