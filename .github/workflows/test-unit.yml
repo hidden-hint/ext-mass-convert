@@ -1,0 +1,31 @@
+name: Unit Test
+
+on:
+  push
+
+jobs:
+  test:
+    name: Test on PHP ${{ matrix.php-versions }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: ['8.1', '8.2', '8.3']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP with Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          tools: composer:v2
+          ini-values: memory_limit=1024M
+
+      - name: Install npm Dependencies
+        run: npm install
+
+      - name: Build Application
+        run: npm run build
+
+      - name: Run Unit Tests
+        run: npm run test
