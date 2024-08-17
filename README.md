@@ -1,3 +1,5 @@
+[![Unit Test](https://github.com/hidden-hint/ext-mass-convert/actions/workflows/test-unit.yml/badge.svg)](https://github.com/hidden-hint/ext-mass-convert/actions/workflows/test-unit.yml)
+
 # Mass Lead Conversion Extension for EspoCRM
 
 An extension that allows bulk lead conversion to arbitrary entity types. It adds a new action to the lead list view that allows you to select multiple leads and convert them to any entity type that is enabled in the system. Works also with custom entity types.
