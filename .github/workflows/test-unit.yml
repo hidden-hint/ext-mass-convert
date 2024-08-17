@@ -26,6 +26,7 @@ jobs:
 
       - name: Install Composer Dependencies
         run: |
+          node build --fetch
           node build --composer-install
           cd site
           composer update --no-interaction --dev
