@@ -1,15 +1,12 @@
-name: Unit Tests
+name: Integrations Tests
 
 on:
   push
 
 jobs:
   test:
-    name: Test on PHP ${{ matrix.php-versions }}
+    name: Integration Tests
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-versions: ['8.1', '8.2', '8.3']
 
     steps:
       - uses: actions/checkout@v4
@@ -17,7 +14,7 @@ jobs:
       - name: Setup PHP with Composer
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-versions }}
+          php-version: 8.3
           tools: composer:v2
           ini-values: memory_limit=1024M
 
@@ -32,4 +29,4 @@ jobs:
           composer update --no-interaction --dev
 
       - name: Run Tests
-        run: npm run test-unit
+        run: npm run test-integration

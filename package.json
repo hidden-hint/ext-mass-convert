@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "build": "node build --all",
-    "test": "node build --copy; site/vendor/bin/phpunit site/tests/unit/Espo/Modules/MassConvert"
+    "test-unit": "node build --copy; site/vendor/bin/phpunit site/tests/unit/Espo/Modules/MassConvert",
+    "test-integration": "node build --copy; cd site/; vendor/bin/phpunit tests/integration/Espo/Modules/MassConvert"
   },
   "type": "module",
   "author": "hidden hint GmbH",
