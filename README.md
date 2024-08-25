@@ -1,4 +1,4 @@
-[![Unit Test](https://github.com/hidden-hint/ext-mass-convert/actions/workflows/test-unit.yml/badge.svg)](https://github.com/hidden-hint/ext-mass-convert/actions/workflows/test-unit.yml)
+[![Unit Tests](https://github.com/hidden-hint/ext-mass-convert/actions/workflows/test-unit.yml/badge.svg)](https://github.com/hidden-hint/ext-mass-convert/actions/workflows/test-unit.yml) [![Integrations Tests](https://github.com/hidden-hint/ext-mass-convert/actions/workflows/test-integration.yml/badge.svg)](https://github.com/hidden-hint/ext-mass-convert/actions/workflows/test-integration.yml)
 
 # Mass Lead Conversion Extension for EspoCRM
 
@@ -27,7 +27,7 @@ Add following to your `custom/Espo/Custom/Resources/metadata/entityDefs/Lead.jso
 
 Mass action will convert selected leads to the entity types listed in the `massConvert` array. You can add any entity type that is enabled in your system.
 
-Additionally, you can specify fields map for each entity type. Add following to your `custom/Espo/Custom/Resources/metadata/entityDefs/Lead.json` file:
+Additionally, one can specify fields map for each entity type. Add following to your `custom/Espo/Custom/Resources/metadata/entityDefs/Lead.json` file:
 
 ```json
 {
@@ -41,6 +41,22 @@ Additionally, you can specify fields map for each entity type. Add following to 
       "phone": "phone",
       "cYourCustomLeadField": "cYourCustomContactField"
     }
+  }
+}
+```
+
+Many-to-one relation filed can be declared in `convertLinks` section:
+
+```json
+{
+  "convertLinks": {
+    "Contact": [
+      {
+        "entityType": "Account",
+        "linkName": "accounts",
+        "field": "cAccountsId"
+      }
+    ]
   }
 }
 ```

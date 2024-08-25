@@ -22,6 +22,10 @@ class MassConvertService
         private readonly Acl $acl,
     ) {}
 
+    /**
+     * @throws Forbidden
+     * @throws NotFound
+     */
     public function convert(string ...$ids): void
     {
         array_map(fn(string $entityType) => array_map(
@@ -30,6 +34,10 @@ class MassConvertService
         ), $this->metadata->get('entityDefs.Lead.massConvert', []));
     }
 
+    /**
+     * @throws Forbidden
+     * @throws NotFound
+     */
     private function convertTo(string $entityType, string $leadId): void
     {
         /** @var Lead $lead */
@@ -48,6 +56,10 @@ class MassConvertService
         $this->updateLead($lead, $newEntity);
     }
 
+    /**
+     * @throws Forbidden
+     * @throws NotFound
+     */
     private function createEntity(string $entityType, Lead $lead): Entity
     {
         $entity = $this->entityManager->getEntity($entityType);
@@ -60,14 +72,9 @@ class MassConvertService
             throw new Forbidden("No create access for '$entityType'.");
         }
 
-        $fieldsMap = $this->metadata->get("entityDefs.Lead.convertFields.$entityType", []);
-
-        array_map(
-            static fn(string $fromField, string $toField) => $entity->set($toField, $lead->get($fromField)),
-            array_keys($fieldsMap),
-            array_values($fieldsMap)
-        );
+        $this->setFields($entity, $lead);
         $this->entityManager->saveEntity($entity);
+        $this->setLinks($entity, $lead);
 
         return $entity;
     }
@@ -85,5 +92,35 @@ class MassConvertService
         }
 
         $this->entityManager->saveEntity($lead);
+    }
+
+    private function setFields(Entity $entity, Lead $lead): void
+    {
+        $fieldsMap = $this->metadata->get(sprintf('entityDefs.Lead.convertFields.%s', $entity->getEntityType()), []);
+
+        array_map(
+            static fn(string $fromField, string $toField) => $entity->set($toField, $lead->get($fromField)),
+            array_keys($fieldsMap),
+            array_values($fieldsMap)
+        );
+    }
+
+    /**
+     * @throws NotFound
+     */
+    private function setLinks(Entity $entity, Lead $lead): void
+    {
+        $links = $this->metadata->get(sprintf('entityDefs.Lead.convertLinks.%s', $entity->getEntityType()), []);
+        $repository = $this->entityManager->getRDBRepository($entity->getEntityType());
+
+        array_map(function(array $link) use ($repository, $entity, $lead): void {
+            $relatedEntity = $this->entityManager->getEntity($link['entityType'], $lead->get($link['field']));
+
+            if (null === $relatedEntity || ! $relatedEntity->hasId()) {
+                throw new NotFound(sprintf('Related %s %s not found', $link['entityType'], $lead->get($link['field'])));
+            }
+
+            $repository->getRelation($entity, $link['linkName'])->relate($relatedEntity);
+        }, $links);
     }
 }
