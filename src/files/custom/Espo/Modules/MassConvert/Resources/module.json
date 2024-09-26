@@ -1,5 +1,3 @@
 {
-    "order": 50,
-    "bundled": true,
-    "jsTranspiled": true
+    "order": 100
 }
