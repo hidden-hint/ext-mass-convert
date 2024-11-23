@@ -4,6 +4,7 @@ Espo.define('mass-convert:views/lead/record/list', 'views/record/list', function
             Dep.prototype.setup.call(this);
 
             this.massActionList.push('convert');
+            this.checkAllResultMassActionList.push('convert');
         },
         massActionConvert: function () {
             Espo.Ui.notify(this.translate('converting', 'messages'));
