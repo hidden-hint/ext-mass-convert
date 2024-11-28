@@ -14,7 +14,7 @@ use Espo\Modules\Crm\Entities\Contact;
 use Espo\Modules\Crm\Entities\Lead;
 use Espo\ORM\Entity;
 
-final readonly class MassConvertService
+class MassConvertService
 {
     public function __construct(private EntityManager $entityManager, private Metadata $metadata, private Acl $acl) {}
 
