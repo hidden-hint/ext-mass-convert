@@ -10,8 +10,11 @@
   "type": "module",
   "author": "hidden hint GmbH",
   "dependencies": {
-    "espo-extension-tools": "github:espocrm/extension-tools#0.1.5",
-    "fs-extra": "^9.0.0"
+    "espo-extension-tools": "github:espocrm/extension-tools#0.4.6",
+    "fs-extra": "^11.3.0"
+  },
+  "overrides": {
+    "adm-zip": "^0.6.1"
   },
   "engines": {
     "npm": ">=7",
