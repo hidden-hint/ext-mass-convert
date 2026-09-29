@@ -7,6 +7,21 @@ jobs:
   test:
     name: Integration Tests
     runs-on: ubuntu-latest
+    env:
+      TEST_DATABASE_HOST: '127.0.0.1'
+      TEST_DATABASE_PORT: '8888'
+      TEST_DATABASE_NAME: integration_test
+      TEST_DATABASE_USER: root
+      TEST_DATABASE_PASSWORD: password
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: integration_test
+        ports:
+          - '8888:3306'
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - uses: actions/checkout@v4
@@ -21,12 +36,16 @@ jobs:
       - name: Install npm Dependencies
         run: npm install
 
-      - name: Install Composer Dependencies
+      - name: Fetch EspoCRM
         run: |
           node build --fetch
           node build --composer-install
+
+      - name: Build EspoCRM Test Instance
+        run: |
           cd site
-          composer update --no-interaction --dev
+          npm install
+          npx grunt test
 
       - name: Run Tests
         run: npm run test-integration
