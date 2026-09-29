@@ -13,7 +13,7 @@ jobs:
         php-versions: ['8.3', '8.4', '8.5']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup PHP with Composer
         uses: shivammathur/setup-php@v2
@@ -30,7 +30,7 @@ jobs:
           node build --fetch
           node build --composer-install
           cd site
-          composer update --no-interaction --dev
+          composer update --no-interaction
 
       - name: Run Tests
         run: npm run test-unit

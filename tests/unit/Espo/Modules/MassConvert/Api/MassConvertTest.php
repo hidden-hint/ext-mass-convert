@@ -14,11 +14,10 @@ use Espo\Core\Select\SelectBuilderFactory;
 use Espo\Modules\MassConvert\Lead\MassConvertService;
 use Espo\ORM\EntityManager;
 use JsonException;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \Espo\Modules\MassConvert\Api\MassConvert
- */
+#[CoversClass(MassConvert::class)]
 final class MassConvertTest extends TestCase
 {
     /**

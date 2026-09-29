@@ -19,11 +19,10 @@ use Espo\Core\Utils\Metadata;
 use Espo\Modules\Crm\Entities\Lead;
 use Espo\ORM\Repository\RDBRelation;
 use Espo\ORM\Repository\RDBRepository;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @covers \Espo\Modules\MassConvert\Lead\MassConvertService
- */
+#[CoversClass(MassConvertService::class)]
 final class MassConvertServiceTest extends TestCase
 {
     private MassConvertService $service;
@@ -159,10 +158,7 @@ final class MassConvertServiceTest extends TestCase
             [$testEntityType, null, $testEntity],
         ]);
 
-        $this->mockEntityManager->expects($this->exactly(2))->method('saveEntity')->willReturnOnConsecutiveCalls(
-            $this->returnCallback(fn(Entity $entity) => $this->assertSame($testEntity, $entity)),
-            $this->returnCallback(fn($entity) => $this->assertSame($testLead, $entity)),
-        );
+        $this->expectEntitiesSavedInOrder($testEntity, $testLead);
 
         $this->service->convert($testLeadId);
     }
@@ -217,10 +213,7 @@ final class MassConvertServiceTest extends TestCase
             [Campaign::ENTITY_TYPE, $testRelatedCampaignId, $relatedCampaign],
         ]);
 
-        $this->mockEntityManager->expects($this->exactly(2))->method('saveEntity')->willReturnOnConsecutiveCalls(
-            $this->returnCallback(fn(Entity $entity) => $this->assertSame($testEntity, $entity)),
-            $this->returnCallback(fn($entity) => $this->assertSame($testLead, $entity)),
-        );
+        $this->expectEntitiesSavedInOrder($testEntity, $testLead);
 
         $this->service->convert($testLeadId);
     }
@@ -282,5 +275,14 @@ final class MassConvertServiceTest extends TestCase
         ]);
 
         $this->service->convert($testLeadId);
+    }
+
+    private function expectEntitiesSavedInOrder(Entity ...$entities): void
+    {
+        $this->mockEntityManager->expects($this->exactly(count($entities)))->method('saveEntity')->willReturnCallback(
+            function (Entity $entity) use (&$entities): void {
+                $this->assertSame(array_shift($entities), $entity);
+            }
+        );
     }
 }
