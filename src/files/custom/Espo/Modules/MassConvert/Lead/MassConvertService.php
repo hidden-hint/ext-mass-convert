@@ -109,14 +109,47 @@ class MassConvertService
         $links = $this->metadata->get(sprintf('entityDefs.Lead.convertLinks.%s', $entity->getEntityType()), []);
         $repository = $this->entityManager->getRDBRepository($entity->getEntityType());
 
-        array_map(function(array $link) use ($repository, $entity, $lead): void {
-            $relatedEntity = $this->entityManager->getEntity($link['entityType'], $lead->get($link['field']));
+        array_map(fn(array $link) => array_map(
+            static fn(Entity $relatedEntity) => $repository->getRelation($entity, $link['linkName'])->relate($relatedEntity),
+            $this->findRelatedEntities($lead, $link)
+        ), $links);
+    }
 
-            if (null === $relatedEntity || ! $relatedEntity->hasId()) {
-                throw new NotFound(sprintf('Related %s %s not found', $link['entityType'], $lead->get($link['field'])));
-            }
+    /**
+     * @return Entity[]
+     * @throws NotFound
+     */
+    private function findRelatedEntities(Lead $lead, array $link): array
+    {
+        if (isset($link['leadLinkName'])) {
+            return $this->findLeadLinkedEntities($lead, $link['leadLinkName']);
+        }
 
-            $repository->getRelation($entity, $link['linkName'])->relate($relatedEntity);
-        }, $links);
+        return [$this->findLeadReferencedEntity($lead, $link['entityType'], $link['field'])];
+    }
+
+    /**
+     * @return Entity[]
+     */
+    private function findLeadLinkedEntities(Lead $lead, string $leadLinkName): array
+    {
+        return iterator_to_array(
+            $this->entityManager->getRDBRepository(Lead::ENTITY_TYPE)->getRelation($lead, $leadLinkName)->find(),
+            false
+        );
+    }
+
+    /**
+     * @throws NotFound
+     */
+    private function findLeadReferencedEntity(Lead $lead, string $entityType, string $field): Entity
+    {
+        $relatedEntity = $this->entityManager->getEntity($entityType, $lead->get($field));
+
+        if (null === $relatedEntity || ! $relatedEntity->hasId()) {
+            throw new NotFound(sprintf('Related %s %s not found', $entityType, $lead->get($field)));
+        }
+
+        return $relatedEntity;
     }
 }

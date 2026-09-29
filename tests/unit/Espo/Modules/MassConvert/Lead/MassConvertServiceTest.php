@@ -10,8 +10,10 @@ namespace Espo\Modules\MassConvert\Lead;
 use Espo\Core\Acl;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Exceptions\NotFound;
+use Espo\Modules\Crm\Entities\Call;
 use Espo\Modules\Crm\Entities\Campaign;
 use Espo\ORM\Entity;
+use Espo\ORM\EntityCollection;
 use Espo\Core\ORM\EntityManager;
 use Espo\Core\Utils\Metadata;
 use Espo\Modules\Crm\Entities\Lead;
@@ -219,6 +221,65 @@ final class MassConvertServiceTest extends TestCase
             $this->returnCallback(fn(Entity $entity) => $this->assertSame($testEntity, $entity)),
             $this->returnCallback(fn($entity) => $this->assertSame($testLead, $entity)),
         );
+
+        $this->service->convert($testLeadId);
+    }
+
+    /**
+     * @throws Forbidden
+     * @throws NotFound
+     */
+    public function testLinksEntitiesRelatedToLead(): void
+    {
+        $testLeadId = '1';
+        $testEntityType = 'foo';
+        $testEntity = $this->createStub(Entity::class);
+        $testEntity->method('getEntityType')->willReturn($testEntityType);
+        $testLead = $this->createStub(Lead::class);
+
+        $this->stubAcl->method('checkEntityCreate')->with($testEntity)->willReturn(true);
+        $this->stubAcl->method('checkEntityEdit')->with($testLead)->willReturn(true);
+
+        $this->stubMetadata->method('get')->willReturnMap([
+            ['entityDefs.Lead.massConvert', [], [$testEntityType]],
+            ["entityDefs.Lead.convertFields.$testEntityType", [], []],
+            [
+                "entityDefs.Lead.convertLinks.$testEntityType",
+                [],
+                [
+                    [
+                        'linkName' => 'calls',
+                        'leadLinkName' => 'calls',
+                    ],
+                ],
+            ],
+        ]);
+
+        $relatedCalls = [$this->createStub(Call::class), $this->createStub(Call::class)];
+
+        $stubLeadRelation = $this->createStub(RDBRelation::class);
+        $stubLeadRelation->method('find')->willReturn(new EntityCollection($relatedCalls));
+
+        $stubLeadRepository = $this->createStub(RDBRepository::class);
+        $stubLeadRepository->method('getRelation')->willReturnMap([[$testLead, 'calls', $stubLeadRelation]]);
+
+        $mockEntityRelation = $this->createMock(RDBRelation::class);
+        $mockEntityRelation->expects($this->exactly(2))->method('relate')->willReturnCallback(
+            static fn(Call $call) => self::assertContains($call, $relatedCalls)
+        );
+
+        $stubEntityRepository = $this->createStub(RDBRepository::class);
+        $stubEntityRepository->method('getRelation')->willReturnMap([[$testEntity, 'calls', $mockEntityRelation]]);
+
+        $this->mockEntityManager->method('getRDBRepository')->willReturnMap([
+            [$testEntityType, $stubEntityRepository],
+            [Lead::ENTITY_TYPE, $stubLeadRepository],
+        ]);
+
+        $this->mockEntityManager->method('getEntity')->willReturnMap([
+            [Lead::ENTITY_TYPE, $testLeadId, $testLead],
+            [$testEntityType, null, $testEntity],
+        ]);
 
         $this->service->convert($testLeadId);
     }

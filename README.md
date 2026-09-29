@@ -60,3 +60,18 @@ Many-to-one relation filed can be declared in `convertLinks` section:
   }
 }
 ```
+
+Many-to-many relations are declared with `leadLinkName` instead of `entityType` and `field`: every record related to the lead through its `leadLinkName` link gets related to the new entity through `linkName`:
+
+```json
+{
+  "convertLinks": {
+    "Contact": [
+      {
+        "linkName": "calls",
+        "leadLinkName": "calls"
+      }
+    ]
+  }
+}
+```
