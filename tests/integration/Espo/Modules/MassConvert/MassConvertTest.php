@@ -10,6 +10,7 @@ use Espo\Core\Exceptions\Error;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Exceptions\NotFound;
 use Espo\Modules\Crm\Entities\Account;
+use Espo\Modules\Crm\Entities\Call;
 use Espo\Modules\Crm\Entities\Campaign;
 use Espo\Modules\Crm\Entities\Contact;
 use Espo\Modules\Crm\Entities\Lead;
@@ -99,6 +100,70 @@ final class MassConvertTest extends BaseTestCase
         $contact = $this->findEntityByAttribute(Contact::ENTITY_TYPE, 'firstName', $testLeadFirstName);
         $this->assertSame($testCampaign->getId(), $contact->get('campaignId'));
     }
+
+    /**
+     * @throws BadRequest
+     * @throws NotFoundExceptionInterface
+     * @throws Conflict
+     * @throws Error
+     * @throws JsonException
+     * @throws Forbidden
+     * @throws NotFound
+     */
+    public function testConvertsManyToManyField(): void
+    {
+        $this->setLeadEntityDefs([
+            'massConvert' => [Contact::ENTITY_TYPE],
+            'convertFields' => [
+                Contact::ENTITY_TYPE => [
+                    'firstName' => 'firstName',
+                ],
+            ],
+            'convertLinks' => [
+                Contact::ENTITY_TYPE => [
+                    [
+                        'linkName' => 'calls',
+                        'leadLinkName' => 'calls',
+                    ],
+                ],
+            ],
+        ]);
+
+        $testCall = $this->createEntity(Call::ENTITY_TYPE, ['name' => 'Call 1']);
+
+        $testLeadFirstName = 'Lead 1';
+        $lead = $this->createEntity(Lead::ENTITY_TYPE, ['firstName' => $testLeadFirstName]);
+
+        $this->relate($lead, 'calls', $testCall);
+
+        $this->processMassConvertRequest($lead->getId());
+
+        $contact = $this->findEntityByAttribute(Contact::ENTITY_TYPE, 'firstName', $testLeadFirstName);
+        $this->assertSame([$testCall->getId()], $this->findRelatedIds($contact, 'calls'));
+    }
+
+    private function relate(Entity $entity, string $linkName, Entity $relatedEntity): void
+    {
+        $this->getEntityManager()
+            ->getRDBRepository($entity->getEntityType())
+            ->getRelation($entity, $linkName)
+            ->relate($relatedEntity);
+    }
+
+    private function findRelatedIds(Entity $entity, string $linkName): array
+    {
+        return array_map(
+            static fn(Entity $relatedEntity) => $relatedEntity->getId(),
+            iterator_to_array(
+                $this->getEntityManager()
+                    ->getRDBRepository($entity->getEntityType())
+                    ->getRelation($entity, $linkName)
+                    ->find(),
+                false
+            )
+        );
+    }
+
 
     private function findEntityByAttribute(string $entityType, string $attribute, $value): ?Entity
     {
